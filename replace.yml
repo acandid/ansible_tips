@@ -1,0 +1,28 @@
+# Comment
+
+---
+- hosts: node2
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: Commenting a line using the regular expressions
+      replace: 
+        path: /etc/httpd/conf.d/ssl.almircandido.com.conf
+        regexp: '(.*SSLCertificateChainFile.*)'       #Use any word you only have on the line you want to comment on. 
+        replace: '#\1'
+
+
+####################################################
+# Uncomment
+
+- hosts: node2
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: Uncomment this line
+      replace: 
+        path: /etc/httpd/conf.d/ssl.almircandido.com.conf
+        regexp: '^#(.*SSLCertificateChainFile.*)' #Use any word you only have on the line you want to uncomment.
+        replace: '\1'
+...     
+
