@@ -24,5 +24,14 @@
         path: /etc/httpd/conf.d/ssl.almircandido.com.conf
         regexp: '^#(.*SSLCertificateChainFile.*)' #Use any word you only have on the line you want to uncomment.
         replace: '\1'
+       
+#############################################################
+
+#f you only want to execute the ad hoc command.
+
+#ansible node2 -b -m replace -a "path=/etc/httpd/conf.d/ssl.almircandido.com.conf regexp='(.*SSLCertificateChainFile.*)' replace='#\1'"
+#ansible node2 -b -m replace -a "path=/etc/httpd/conf.d/ssl.almircandido.com.conf regexp='^#(.*SSLCertificateChainFile.*)' replace='\1'"
+
+
 ...     
 
