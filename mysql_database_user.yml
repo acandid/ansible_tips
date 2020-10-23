@@ -1,0 +1,48 @@
+---
+####################################################
+##Author: Almir Candido                            #
+##Contact: https://br.linkedin.com/in/almircandido #
+##                                                 #
+##Ansible Version: 2.9                             #
+##                                                 #
+##Requirements on client node:                     #
+##Install rhel 8 family:                           #
+##python2-PyMySQL                                  #
+##python3-PyMySQL                                  #
+##rhel 7                                           #
+##MySQL-python                                     #
+##                                                 #
+##Install Deb family:                              #
+##python-mysqldb                                   #
+####################################################
+- name: MySQL create Database, User and permission
+  hosts: database
+  become: yes
+  vars:
+    mysql_db_name: wordpress
+    mysql_db_user: almir
+    mysql_db_user_pass: your_user_mysql_passoword
+    mysql_db_user_src_ip: 192.168.0.61
+    mysql_root_user: root
+    mysql_root_pass: your_root_mysql_passoword
+    mysql_root_host: localhost
+  tasks:
+    - name: Create Database
+      mysql_db:
+        name: "{{ mysql_db_name }}"
+        state: present
+        login_host: "{{ mysql_root_host }}"
+        login_user: "{{ mysql_root_user }}"
+        login_password: "{{ mysql_root_pass }}"
+
+    - name: Create User and permission 
+      mysql_user:
+        name: "{{ mysql_db_user }}"
+        password: "{{ mysql_db_user_pass }}"
+        state: present
+        host: "{{ mysql_db_user_src_ip }}"
+        priv: '{{ mysql_db_name }}.*:ALL'
+        login_host: "{{ mysql_root_host }}"
+        login_user: "{{ mysql_root_user }}"
+        login_password: "{{ mysql_root_pass }}"
+...
