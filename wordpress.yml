@@ -1,0 +1,95 @@
+---
+#####################################################
+#                                                   #
+#                   WORDPRESS                       #  
+#                                                   #
+###Author: Almir Candido                            #
+###Contact: https://br.linkedin.com/in/almircandido #
+###                                                 #
+###Ansible Version: 2.9                             #
+###                                                 #
+###Requirements:                                    #
+###php                                              #
+###php mysql connector                              #
+###apache                                           #
+###database                                         #
+###                                                 #
+#####################################################
+# Wordpress change according to the version you are using (English or Portuguese)
+- name: Install and configure Wordpress
+  hosts: wordpress
+  become: yes
+  vars:
+#    wordpress_pkg: https://wordpress.org/latest.tar.gz              # English version
+#    wordpress_pkg: https://br.wordpress.org/latest-pt_BR.tar.gz     # Portuguese version
+    wordpress_db_name: web
+    wordpress_db_user: wordpress
+    wordpress_db_pass: 123qwe
+    wordpress_db_host: 192.168.0.21
+    wordpress_documentroot: /var/www/html
+    wordpress_new_directory: webnew
+    wordpress_config_file: "{{ wordpress_documentroot }}/{{ wordpress_new_directory }}/wp-config.php"
+  tasks:
+    - name: Download Wordpress
+      get_url:
+        url: "{{ wordpress_pkg }}"
+        dest: /tmp
+      register: result
+
+    - name: Create new wordpress directory
+      file:
+        path: "{{ wordpress_documentroot }}/{{ wordpress_new_directory }}"
+        state: directory
+        recurse: yes
+
+    - name: Unarchive Wordpress files
+      unarchive:
+        src: "{{ result.dest }}"
+        dest: /tmp
+        remote_src: yes
+
+    - name: Copy wordpress files to new directory
+      copy:
+        src: /tmp/wordpress/
+        dest: "{{ wordpress_documentroot }}/{{ wordpress_new_directory }}/"
+        directory_mode: yes
+        remote_src: yes
+
+    - name: Create wp-config.php file
+      copy:
+        src: "{{ wordpress_documentroot }}/{{ wordpress_new_directory }}/wp-config-sample.php"
+        dest: "{{ wordpress_config_file }}"
+        remote_src: yes
+
+# Wordpress change according to the version you are using (English or Portuguese)
+    - name: Configure database name
+      replace:
+        path: "{{ wordpress_config_file }}"
+#        regexp: '^(.*)database_name_here(.*)$'                                #If you use the English version, uncomment this line.
+#        regexp: '^(.*)nome_do_banco_de_dados_aqui(.*)$'                       #If you use the Portuguese version, uncomment this line.     
+        replace: "define( 'DB_NAME', '{{ wordpress_db_name }}' );"
+
+    - name: Configure database user
+      replace:
+         path: "{{ wordpress_config_file }}"
+#         regexp: '^(.*)username_here(.*)$'                                     #If you use the English version, uncomment this line.
+#         regexp: '^(.*)nome_de_usuario_aqui(.*)$'                              #If you use the Portuguese version, uncomment this line.
+         replace: "define( 'DB_USER', '{{ wordpress_db_user }}' );"
+
+    - name: Configure database user password
+      replace:
+        path: "{{ wordpress_config_file }}"
+#        regexp: '^(.*)password_here(.*)$'                                       #If you use the English version, uncomment this line.
+#        regexp: '^(.*)senha_aqui(.*)$'                                          #If you use the Portuguese version, uncomment this line.
+        replace: "define( 'DB_PASSWORD', '{{ wordpress_db_pass }}' );"
+
+    - name: Configure database host
+      replace:
+        path: "{{ wordpress_config_file }}"
+        regexp: '^(.*)localhost(.*)$'
+        replace: "define( 'DB_HOST', '{{ wordpress_db_host }}' );"
+
+    - debug:
+        msg: "Finish the installation access: {{ ansible_facts['default_ipv4']['address'] }}/{{ wordpress_new_directory }}/wp-admin/install.php"
+...
+
